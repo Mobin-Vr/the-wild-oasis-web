@@ -1,14 +1,40 @@
-import { getCabin } from '@/app/_lib/data-service';
+import { getCabin, getCabins } from '@/app/_lib/data-service';
 import { Cabin } from '@/types';
 import { EyeSlashIcon, MapPinIcon, UsersIcon } from '@heroicons/react/24/solid';
+import { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
-export default async function Page({
-   params,
-}: {
+interface PageProps {
    params: Promise<{ cabinId: string }>;
-}) {
+}
+
+export async function generateMetadata({
+   params,
+}: PageProps): Promise<Metadata> {
+   const { cabinId } = await params;
+   const cabin: Cabin | null = await getCabin(+cabinId);
+
+   // No cabin found for this id — fall back to a generic title instead of crashing
+   if (!cabin) return { title: 'Cabin not found' };
+
+   const { name } = cabin;
+
+   return { title: `Cabin ${name}` };
+}
+
+// This function gets called at build time on server
+export async function generateStaticParams() {
+   const cabins: Cabin[] = await getCabins();
+
+   const ids = cabins.map((cabin) => ({
+      cabinId: String(cabin.id),
+   }));
+
+   return ids;
+}
+
+export default async function Page({ params }: PageProps) {
    const { cabinId } = await params;
    const cabin: Cabin | null = await getCabin(+cabinId);
 
@@ -31,7 +57,7 @@ export default async function Page({
             </div>
 
             <div>
-               <h3 className='text-accent-100 font-black text-7xl mb-5 translate-x-[-254px] bg-primary-950 p-6 pb-1 w-[150%]'>
+               <h3 className='text-accent-100 font-black text-7xl mb-5 -translate-x-63.5 bg-primary-950 p-6 pb-1 w-[150%]'>
                   Cabin {name}
                </h3>
 
