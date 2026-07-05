@@ -8,3 +8,5 @@ export interface Cabin {
    description: string;
    image: string;
 }
+
+export type CabinFilter = 'small' | 'medium' | 'large' | 'all';

@@ -1,13 +1,12 @@
-import { eachDayOfInterval } from 'date-fns';
-import { supabase } from './supabase';
 import {
-   Cabin,
-   Guest,
    Booking,
    BookingWithCabinPreview,
+   Cabin,
+   Guest,
    Settings,
 } from '@/types';
-import { cacheLife, cacheTag } from 'next/cache';
+import { eachDayOfInterval } from 'date-fns';
+import { supabase } from './supabase';
 
 /////////////
 // GET
@@ -161,10 +160,15 @@ interface Country {
    // add more fields here as you actually use them
 }
 
+type RawCountry = {
+   names: { common: string };
+   flag: { emoji: string };
+};
+
 export async function getCountries(): Promise<Country[]> {
    try {
       const res = await fetch(
-         'https://api.restcountries.com/countries/v5?q=canada',
+         'https://api.restcountries.com/countries/v5?region=Europe',
          {
             headers: {
                Authorization: `Bearer ${process.env.REST_COUNTRIES_API_KEY}`,
@@ -174,8 +178,15 @@ export async function getCountries(): Promise<Country[]> {
 
       const response = await res.json();
 
-      const countries: Country[] = response?.data?.objects || [];
-      console.log(response);
+      const objects = response?.data?.objects;
+      const rawCountries: RawCountry[] = Array.isArray(objects) ? objects : [];
+
+      const countries: Country[] = rawCountries.map((country) => ({
+         name: country.names?.common || 'Unknown',
+         flag: country.flag?.emoji || '',
+      }));
+
+      console.log('>>>', countries);
 
       return countries;
    } catch {

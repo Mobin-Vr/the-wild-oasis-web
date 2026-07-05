@@ -2,12 +2,23 @@ import type { Metadata } from 'next';
 import CabinList from '../_components/CabinList';
 import { Suspense } from 'react';
 import Spinner from '../_components/Spinner';
+import { CabinFilter } from '@/types';
+import Filter from '../_components/Filter';
 
 export const metadata: Metadata = {
    title: 'Cabins',
 };
 
-export default function Page() {
+type PageProps = {
+   searchParams: Promise<{
+      capacity?: CabinFilter;
+   }>;
+};
+
+export default async function Page({ searchParams }: PageProps) {
+   const resolvedSearchParams = await searchParams;
+   const filter = resolvedSearchParams?.capacity ?? 'all';
+
    return (
       <div>
          <h1 className='text-4xl mb-5 text-accent-400 font-medium'>
@@ -22,8 +33,12 @@ export default function Page() {
             peaceful, calm vacation. Welcome to paradise.
          </p>
 
-         <Suspense fallback={<Spinner />}>
-            <CabinList />
+         <div className='mb-8 flex justify-end'>
+            <Filter />
+         </div>
+
+         <Suspense fallback={<Spinner />} key={filter}>
+            <CabinList filter={filter} />
          </Suspense>
       </div>
    );
