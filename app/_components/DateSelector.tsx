@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { differenceInDays } from 'date-fns';
-import { DayPicker, type DateRange } from 'react-day-picker';
-import 'react-day-picker/style.css';
 import { Cabin, Settings } from '@/types';
+import { differenceInDays } from 'date-fns';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/style.css';
+import { useReservation } from './ReservationContext';
 
 interface DateSelectorProps {
    cabin: Pick<Cabin, 'regularPrice' | 'discount'>;
@@ -18,7 +18,7 @@ function DateSelector({
    bookedDates = [],
    settings,
 }: DateSelectorProps) {
-   const [range, setRange] = useState<DateRange | undefined>(undefined);
+   const { range, setRange } = useReservation();
 
    const { regularPrice, discount } = cabin;
    const { minBookingLength, maxBookingLength } = settings;
